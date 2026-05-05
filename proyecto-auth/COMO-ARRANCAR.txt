@@ -1,0 +1,147 @@
+========================================================
+PASOS PARA ARRANCAR EL PROYECTO
+========================================================
+
+PREREQUISITOS:
+  - Node.js 18+ instalado
+  - Docker Desktop instalado y corriendo
+  - Cuenta de Google Cloud (para OAuth)
+
+========================================================
+PASO 1: BASE DE DATOS (PostgreSQL con Docker)
+========================================================
+
+Desde la carpeta raíz del proyecto (proyecto-auth/):
+
+  docker-compose up -d
+
+Verifica que el contenedor está corriendo:
+  docker ps
+
+========================================================
+PASO 2: CONFIGURAR EL BACKEND
+========================================================
+
+  cd backend
+
+  # Copiar variables de entorno
+  cp .env.example .env
+
+  # Editar .env con tus valores:
+  #   - DATABASE_URL: ya está configurada para docker-compose
+  #   - JWT_ACCESS_SECRET: genera uno con:
+  #     node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+  #   - JWT_REFRESH_SECRET: genera otro con el mismo comando
+  #   - SESSION_SECRET: igual
+  #   - GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET: ver paso 2.1
+  #   - EMAIL_USER y EMAIL_PASSWORD: ver paso 2.2
+
+  # Instalar dependencias
+  npm install
+
+  # Crear las tablas en la base de datos
+  npm run db:migrate
+  # Cuando pregunte el nombre de la migración: "init"
+
+  # Iniciar el servidor
+  npm run dev
+
+  El backend corre en: http://localhost:3001
+  Health check:        http://localhost:3001/health
+
+========================================================
+PASO 2.1: CONFIGURAR GOOGLE OAUTH
+========================================================
+
+1. Ve a https://console.cloud.google.com/
+2. Crea un proyecto nuevo o selecciona uno existente
+3. Ve a "APIs y servicios" → "Credenciales"
+4. Click "Crear credenciales" → "ID de cliente de OAuth 2.0"
+5. Tipo: "Aplicación web"
+6. Orígenes JavaScript autorizados:
+     http://localhost:5173
+     http://localhost:3001
+7. URIs de redirección autorizados:
+     http://localhost:3001/api/auth/google/callback
+8. Copia el Client ID y Client Secret al .env del backend
+
+TAMBIÉN: Ve a "Pantalla de consentimiento de OAuth" y configura:
+  - Nombre de la app
+  - Email de soporte
+  - Scopes: email, profile
+
+========================================================
+PASO 2.2: CONFIGURAR EMAIL (Gmail)
+========================================================
+
+Para usar Gmail como servidor de email:
+1. Ve a tu cuenta de Google → Seguridad
+2. Activa "Verificación en 2 pasos" (requerido)
+3. Ve a "Contraseñas de aplicaciones"
+4. Genera una contraseña para "Correo" + "Windows"
+5. Copia esa contraseña de 16 caracteres al .env como EMAIL_PASSWORD
+6. EMAIL_USER = tu email de Gmail completo
+
+========================================================
+PASO 3: CONFIGURAR EL FRONTEND
+========================================================
+
+  cd ../frontend
+
+  # Instalar dependencias
+  npm install
+
+  # Iniciar el servidor de desarrollo
+  npm run dev
+
+  El frontend corre en: http://localhost:5173
+
+========================================================
+PASO 4: VERIFICAR QUE TODO FUNCIONA
+========================================================
+
+1. Abre http://localhost:5173
+2. Deberías ver la pantalla de login
+3. Prueba el flujo completo:
+   a) Registro → recibirás email de verificación
+   b) Verificar email → click en el link del email
+   c) Login → deberías entrar al dashboard
+   d) Login con Google → click en "Continuar con Google"
+
+========================================================
+COMANDOS ÚTILES
+========================================================
+
+Backend:
+  npm run dev          - Servidor de desarrollo con hot-reload
+  npm run db:studio    - Abrir Prisma Studio (UI de la DB)
+  npm run db:migrate   - Crear/aplicar migraciones
+  npm run build        - Compilar para producción
+
+Frontend:
+  npm run dev          - Servidor de desarrollo
+  npm run build        - Build de producción
+  npm run preview      - Preview del build
+
+Docker:
+  docker-compose up -d         - Iniciar PostgreSQL
+  docker-compose down          - Detener PostgreSQL
+  docker-compose down -v       - Detener y borrar datos
+
+========================================================
+ENDPOINTS DE LA API
+========================================================
+
+POST   /api/auth/register              - Registro
+POST   /api/auth/login                 - Login
+POST   /api/auth/logout                - Logout
+POST   /api/auth/refresh               - Renovar access token
+GET    /api/auth/verify-email?token=   - Verificar email
+POST   /api/auth/request-password-reset - Solicitar reset
+POST   /api/auth/reset-password        - Resetear contraseña
+GET    /api/auth/me                    - Usuario actual
+GET    /api/auth/google                - Iniciar OAuth Google
+GET    /api/auth/google/callback       - Callback OAuth
+GET    /api/auth/sessions              - Ver sesiones activas
+DELETE /api/auth/sessions/:id          - Revocar sesión
+DELETE /api/auth/sessions              - Revocar todas

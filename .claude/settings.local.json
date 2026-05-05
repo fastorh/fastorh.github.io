@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "PowerShell(*)",
+      "WebSearch",
+      "WebFetch(domain:www.whois.com)",
+      "WebFetch(domain:lookup.icann.org)",
+      "WebFetch(domain:who.is)",
+      "WebFetch(domain:www.google.com)",
+      "WebFetch(domain:indexfreedom.xyz)",
+      "WebFetch(domain:69fa144771f60e4b7c9c77ce--indexfreedom-xyz.netlify.app)"
+    ]
+  }
+}
