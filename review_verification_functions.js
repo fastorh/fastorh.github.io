@@ -15,7 +15,7 @@ async function submitReview(formData) {
     // }
 
     const response = await fetch(
-      "https://issrjtjwjzdyruhgzhl.supabase.co/functions/v1/send_review_verification",
+      "https://issrjxtjwjzdyruhgzhl.supabase.co/functions/v1/send_review_verification",
       {
         method: "POST",
         headers: {
@@ -29,10 +29,10 @@ async function submitReview(formData) {
     const data = await response.json()
 
     if (!response.ok) {
-      console.error("Error:", data.error)
+      console.error("Error HTTP", response.status, "→", JSON.stringify(data))
       return {
         success: false,
-        error: data.error || "Error al enviar la reseña",
+        error: data.error || "Error al enviar la reseña (código " + response.status + ")",
       }
     }
 
