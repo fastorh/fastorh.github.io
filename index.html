@@ -7950,7 +7950,7 @@ function calcInflacion2() {
    3. Ve a Settings → API y copia tus credenciales abajo
    ────────────────────────────────────────────────────────── */
 const REV_URL = 'https://issrjxtjwjzdyruhgzhl.supabase.co';
-const REV_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlzc3JqeHRqd2p6ZHlydWhnemhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NjM4MjYsImV4cCI6MjA5MzUzOTgyNn0.HyzrftyiRMIRjfnE94fLFGf3QbzBqfKjbdAbQEnt2Is';
+const REV_KEY = 'sb_publishable_4qZ_NHLmrH0umY4xxE--VA_aV4gevX5';
 
 const _sb = (typeof supabase !== 'undefined' && !REV_URL.includes('XXXX'))
   ? supabase.createClient(REV_URL, REV_KEY)
@@ -8142,13 +8142,11 @@ async function submitReview() {
   _revMsg('', '');
 
   try {
-    var res = await fetch('https://issrjxtjwjzdyruhgzhl.supabase.co/functions/v1/send-review-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + REV_KEY },
-      body: JSON.stringify({ email: email, nombre: nombre, apellido: apellido, texto: texto, estrellas: _revStars })
+    var { error } = await _sb.auth.signInWithOtp({
+      email: email,
+      options: { shouldCreateUser: true, emailRedirectTo: window.location.href }
     });
-    var data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Error al enviar el código');
+    if (error) throw error;
 
     document.getElementById('revFormStep1').style.display = 'none';
     document.getElementById('revFormStep2').style.display = 'block';
@@ -8162,22 +8160,17 @@ async function submitReview() {
 }
 
 async function resendOtp() {
-  var email    = document.getElementById('revEmail').value.trim().toLowerCase();
-  var nombre   = document.getElementById('revNombre').value.trim();
-  var apellido = document.getElementById('revApellido').value.trim();
-  var texto    = document.getElementById('revTexto').value.trim();
+  var email = document.getElementById('revEmail').value.trim().toLowerCase();
   var btn = document.getElementById('revResendBtn');
   if (btn) { btn.disabled = true; btn.textContent = 'Enviando…'; }
   _revMsg('', '');
 
   try {
-    var res = await fetch('https://issrjxtjwjzdyruhgzhl.supabase.co/functions/v1/send-review-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + REV_KEY },
-      body: JSON.stringify({ email: email, nombre: nombre, apellido: apellido, texto: texto, estrellas: _revStars })
+    var { error } = await _sb.auth.signInWithOtp({
+      email: email,
+      options: { shouldCreateUser: true, emailRedirectTo: window.location.href }
     });
-    var data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Error al reenviar el código');
+    if (error) throw error;
 
     document.getElementById('revOtpCode').value = '';
     _revStartTimer();
@@ -8191,8 +8184,11 @@ async function resendOtp() {
 }
 
 async function verifyAndPublish() {
-  var otp   = (document.getElementById('revOtpCode').value || '').trim();
-  var email = document.getElementById('revEmail').value.trim().toLowerCase();
+  var otp      = (document.getElementById('revOtpCode').value || '').trim();
+  var email    = document.getElementById('revEmail').value.trim().toLowerCase();
+  var nombre   = document.getElementById('revNombre').value.trim();
+  var apellido = document.getElementById('revApellido').value.trim();
+  var texto    = document.getElementById('revTexto').value.trim();
 
   if (!otp || otp.length < 6) return _revMsg('Introduce el código de 6 dígitos que has recibido.', 'err');
 
@@ -8201,13 +8197,26 @@ async function verifyAndPublish() {
   _revMsg('', '');
 
   try {
-    var res = await fetch('https://issrjxtjwjzdyruhgzhl.supabase.co/functions/v1/verify-review-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + REV_KEY },
-      body: JSON.stringify({ email: email, code: otp })
+    var { error: otpError } = await _sb.auth.verifyOtp({
+      email: email,
+      token: otp,
+      type: 'email'
     });
-    var data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Código incorrecto o expirado');
+    if (otpError) {
+      var msg = otpError.message || '';
+      if (msg.includes('expired')) throw new Error('Código expirado. Solicita uno nuevo.');
+      throw new Error('Código incorrecto. Intenta de nuevo.');
+    }
+
+    var { error: insError } = await _sb.from('reviews').insert({
+      email: email,
+      nombre: nombre,
+      apellido: apellido,
+      texto: texto,
+      estrellas: _revStars,
+      visible: true
+    });
+    if (insError) throw insError;
 
     _revStopTimer();
     localStorage.setItem('if_rev_done', '1');
