@@ -4725,26 +4725,27 @@
           <div class="rev-row">
             <div class="rev-field">
               <label>Nombre *</label>
-              <input type="text" id="revNombre" placeholder="Ej: Carlos" maxlength="50">
+              <input type="text" id="nombre" placeholder="Ej: Carlos" maxlength="50">
             </div>
             <div class="rev-field">
               <label>Primer apellido *</label>
-              <input type="text" id="revApellido" placeholder="Ej: Martínez" maxlength="50">
+              <input type="text" id="primer_apellido" placeholder="Ej: Martínez" maxlength="50">
             </div>
           </div>
           <div class="rev-field">
             <label>Email (@gmail.com obligatorio) *</label>
-            <input type="email" id="revEmail" placeholder="tunombre@gmail.com">
+            <input type="email" id="email" placeholder="tunombre@gmail.com">
           </div>
           <div class="rev-field">
             <label>Valoración *</label>
             <div class="rev-stars-input" id="revStarsInput">
               <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
             </div>
+            <input type="hidden" id="valoracion" value="0">
           </div>
           <div class="rev-field">
             <label>Tu reseña * &nbsp;<span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">(mín. 20 · máx. 500 caracteres)</span></label>
-            <textarea id="revTexto" placeholder="Cuéntanos tu experiencia: qué herramienta usas, cómo te ha ayudado..." maxlength="500"></textarea>
+            <textarea id="texto" placeholder="Cuéntanos tu experiencia: qué herramienta usas, cómo te ha ayudado..." maxlength="500"></textarea>
             <span class="rev-char-count" id="revCharCount">0 / 500</span>
           </div>
           <button class="btn btn-p rev-submit" id="revSubmitBtn" onclick="submitReview()">Verificar email y publicar →</button>
@@ -4755,7 +4756,7 @@
         <div id="revFormStep2" style="display:none">
           <h3>📬 Verifica tu email</h3>
           <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:16px">
-            Hemos enviado un código de <strong style="color:var(--t1)">8 dígitos</strong> a tu Gmail.<br>
+            Hemos enviado un código de <strong style="color:var(--t1)">6 dígitos</strong> a tu Gmail.<br>
             Revisa tu bandeja de entrada (y la carpeta de spam por si acaso).
           </p>
           <div style="text-align:center;margin-bottom:18px;font-size:13px;color:var(--t3)">
@@ -4763,7 +4764,7 @@
           </div>
           <div class="rev-field">
             <label>Código de verificación *</label>
-            <input type="text" id="revOtpCode" placeholder="00000000" maxlength="8" inputmode="numeric"
+            <input type="text" id="verification_code" placeholder="000000" maxlength="6" inputmode="numeric"
               style="font-size:24px;letter-spacing:8px;text-align:center;font-weight:700">
           </div>
           <button class="btn btn-p rev-submit" id="revVerifyBtn" onclick="verifyAndPublish()">Confirmar y publicar reseña →</button>
@@ -7974,9 +7975,11 @@ document.addEventListener('DOMContentLoaded', function() {
     s.addEventListener('click', function() {
       _revStars = +s.dataset.v;
       stars.forEach(function(x) { x.classList.toggle('on', +x.dataset.v <= _revStars); });
+      var valInput = document.getElementById('valoracion');
+      if (valInput) valInput.value = _revStars;
     });
   });
-  var ta = document.getElementById('revTexto');
+  var ta = document.getElementById('texto');
   if (ta) ta.addEventListener('input', function() {
     document.getElementById('revCharCount').textContent = ta.value.length + ' / 500';
   });
@@ -8008,9 +8011,9 @@ function _revDate(iso) {
 }
 function _revCard(r) {
   var ini = (r.nombre||'?')[0].toUpperCase();
-  var col = _revColor(r.nombre + r.apellido);
-  var st  = '★'.repeat(r.estrellas) + '☆'.repeat(5-r.estrellas);
-  var nom = _revEsc(r.nombre) + ' ' + _revEsc((r.apellido||'')[0]||'') + '.';
+  var col = _revColor(r.nombre + (r.primer_apellido||''));
+  var st  = '★'.repeat(r.valoracion) + '☆'.repeat(5-r.valoracion);
+  var nom = _revEsc(r.nombre) + ' ' + _revEsc((r.primer_apellido||'')[0]||'') + '.';
   return '<div class="rev-item">'
     + '<div class="rev-avatar" style="background:'+col+'">'+ini+'</div>'
     + '<div>'
@@ -8031,8 +8034,8 @@ async function _fetchRevs(page, append) {
   try {
     var from = page * _revLimit;
     var { data, error } = await _sb.from('reviews')
-      .select('nombre,apellido,texto,estrellas,created_at')
-      .eq('visible', true)
+      .select('nombre,primer_apellido,texto,valoracion,created_at')
+      .eq('verified', true)
       .order('created_at', { ascending: false })
       .range(from, from + _revLimit);
     if (error) throw error;
@@ -8056,10 +8059,10 @@ async function _loadAvgRating() {
   if (!_sb) return;
   try {
     var { data } = await _sb.from('reviews')
-      .select('estrellas')
-      .eq('visible', true);
+      .select('valoracion')
+      .eq('verified', true);
     if (!data || data.length === 0) return;
-    var sum = data.reduce(function(s, r) { return s + (r.estrellas || 0); }, 0);
+    var sum = data.reduce(function(s, r) { return s + (r.valoracion || 0); }, 0);
     var avg = sum / data.length;
     var avgStr = avg.toFixed(1);
     var fullStars = Math.round(avg);
@@ -8087,7 +8090,7 @@ function backToRevForm() {
   _revStopTimer();
   document.getElementById('revFormStep1').style.display = '';
   document.getElementById('revFormStep2').style.display = 'none';
-  document.getElementById('revOtpCode').value = '';
+  document.getElementById('verification_code').value = '';
   _revMsg('', '');
 }
 
@@ -8119,117 +8122,99 @@ function _revStopTimer() {
   if (_revTimerInterval) { clearInterval(_revTimerInterval); _revTimerInterval = null; }
 }
 
+var _currentReviewId = null;
+
 async function submitReview() {
   if (document.getElementById('revHoneypot').value) return;
-
   if (localStorage.getItem('if_rev_done'))
     return _revMsg('Ya has publicado una reseña desde este dispositivo. ¡Muchas gracias!', 'err');
 
-  var nombre   = document.getElementById('revNombre').value.trim();
-  var apellido = document.getElementById('revApellido').value.trim();
-  var email    = document.getElementById('revEmail').value.trim().toLowerCase();
-  var texto    = document.getElementById('revTexto').value.trim();
+  var nombre          = document.getElementById('nombre').value.trim();
+  var primer_apellido = document.getElementById('primer_apellido').value.trim();
+  var email           = document.getElementById('email').value.trim().toLowerCase();
+  var texto           = document.getElementById('texto').value.trim();
 
-  if (!nombre   || nombre.length   < 2) return _revMsg('Escribe tu nombre (mínimo 2 letras).', 'err');
-  if (!apellido || apellido.length < 2) return _revMsg('Escribe tu primer apellido (mínimo 2 letras).', 'err');
-  if (!email.endsWith('@gmail.com'))     return _revMsg('El email debe ser una cuenta @gmail.com.', 'err');
-  if (_revStars < 1)                     return _revMsg('Selecciona una valoración de 1 a 5 estrellas.', 'err');
-  if (texto.length < 20)                 return _revMsg('La reseña debe tener al menos 20 caracteres.', 'err');
-  if (texto.length > 500)               return _revMsg('La reseña no puede superar 500 caracteres.', 'err');
+  if (!nombre          || nombre.length < 2)          return _revMsg('Escribe tu nombre (mínimo 2 letras).', 'err');
+  if (!primer_apellido || primer_apellido.length < 2) return _revMsg('Escribe tu primer apellido (mínimo 2 letras).', 'err');
+  if (!email.endsWith('@gmail.com'))                  return _revMsg('El email debe ser una cuenta @gmail.com.', 'err');
+  if (_revStars < 1)                                  return _revMsg('Selecciona una valoración de 1 a 5 estrellas.', 'err');
+  if (texto.length < 20)                              return _revMsg('La reseña debe tener al menos 20 caracteres.', 'err');
+  if (texto.length > 500)                             return _revMsg('La reseña no puede superar 500 caracteres.', 'err');
 
   var btn = document.getElementById('revSubmitBtn');
   btn.disabled = true; btn.textContent = 'Enviando código…';
   _revMsg('', '');
 
-  try {
-    var { error } = await _sb.auth.signInWithOtp({
-      email: email,
-      options: { shouldCreateUser: true, emailRedirectTo: window.location.href }
-    });
-    if (error) throw error;
+  var result = await window._submitReviewFn({
+    nombre: nombre,
+    primer_apellido: primer_apellido,
+    email: email,
+    valoracion: _revStars,
+    texto: texto
+  });
 
+  if (result.success) {
+    _currentReviewId = result.reviewId;
     document.getElementById('revFormStep1').style.display = 'none';
     document.getElementById('revFormStep2').style.display = 'block';
     _revStartTimer();
     _revMsg('Código enviado a ' + email + '. Revisa tu bandeja (y spam).', 'ok');
-  } catch(e) {
-    _revMsg(e.message || 'Error al enviar el código. Comprueba el email e inténtalo de nuevo.', 'err');
-  } finally {
-    btn.disabled = false; btn.textContent = 'Verificar email y publicar →';
+  } else {
+    _revMsg(result.error || 'Error al enviar el código. Comprueba el email e inténtalo de nuevo.', 'err');
   }
+  btn.disabled = false; btn.textContent = 'Verificar email y publicar →';
 }
 
 async function resendOtp() {
-  var email = document.getElementById('revEmail').value.trim().toLowerCase();
+  var email           = document.getElementById('email').value.trim().toLowerCase();
+  var nombre          = document.getElementById('nombre').value.trim();
+  var primer_apellido = document.getElementById('primer_apellido').value.trim();
+  var texto           = document.getElementById('texto').value.trim();
   var btn = document.getElementById('revResendBtn');
   if (btn) { btn.disabled = true; btn.textContent = 'Enviando…'; }
   _revMsg('', '');
 
-  try {
-    var { error } = await _sb.auth.signInWithOtp({
-      email: email,
-      options: { shouldCreateUser: true, emailRedirectTo: window.location.href }
-    });
-    if (error) throw error;
+  var result = await window._submitReviewFn({
+    nombre: nombre, primer_apellido: primer_apellido,
+    email: email, valoracion: _revStars, texto: texto
+  });
 
-    document.getElementById('revOtpCode').value = '';
+  if (result.success) {
+    _currentReviewId = result.reviewId;
+    document.getElementById('verification_code').value = '';
     _revStartTimer();
     _revMsg('Nuevo código enviado a ' + email + '. Revisa tu bandeja (y spam).', 'ok');
-  } catch(e) {
-    _revMsg(e.message || 'Error al reenviar el código. Inténtalo de nuevo.', 'err');
+  } else {
+    _revMsg(result.error || 'Error al reenviar el código.', 'err');
     if (btn) btn.style.display = 'block';
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '↺ Solicitar nuevo código'; }
   }
+  if (btn) { btn.disabled = false; btn.textContent = '↺ Solicitar nuevo código'; }
 }
 
 async function verifyAndPublish() {
-  var otp      = (document.getElementById('revOtpCode').value || '').trim();
-  var email    = document.getElementById('revEmail').value.trim().toLowerCase();
-  var nombre   = document.getElementById('revNombre').value.trim();
-  var apellido = document.getElementById('revApellido').value.trim();
-  var texto    = document.getElementById('revTexto').value.trim();
-
-  if (!otp || otp.length < 8) return _revMsg('Introduce el código de 8 dígitos que has recibido.', 'err');
+  var code = (document.getElementById('verification_code').value || '').trim();
+  if (!code || code.length < 6) return _revMsg('Introduce el código de 6 dígitos que has recibido.', 'err');
 
   var btn = document.getElementById('revVerifyBtn');
   btn.disabled = true; btn.textContent = 'Verificando…';
   _revMsg('', '');
 
-  try {
-    var { error: otpError } = await _sb.auth.verifyOtp({
-      email: email,
-      token: otp,
-      type: 'email'
-    });
-    if (otpError) {
-      var msg = otpError.message || '';
-      if (msg.includes('expired')) throw new Error('Código expirado. Solicita uno nuevo.');
-      throw new Error('Código incorrecto. Intenta de nuevo.');
-    }
+  var result = await window._verifyReviewCodeFn(_currentReviewId, code);
 
-    var { error: insError } = await _sb.from('reviews').insert({
-      email: email,
-      nombre: nombre,
-      apellido: apellido,
-      texto: texto,
-      estrellas: _revStars,
-      visible: true
-    });
-    if (insError) throw insError;
-
+  if (result.success) {
     _revStopTimer();
     localStorage.setItem('if_rev_done', '1');
     _revMsg('¡Reseña publicada! Gracias por compartir tu experiencia 🙌', 'ok');
 
     document.getElementById('revFormStep2').style.display = 'none';
     document.getElementById('revFormStep1').style.display = '';
-    document.getElementById('revNombre').value   = '';
-    document.getElementById('revApellido').value = '';
-    document.getElementById('revEmail').value    = '';
-    document.getElementById('revTexto').value    = '';
+    document.getElementById('nombre').value          = '';
+    document.getElementById('primer_apellido').value = '';
+    document.getElementById('email').value           = '';
+    document.getElementById('texto').value           = '';
     document.getElementById('revCharCount').textContent = '0 / 500';
-    document.getElementById('revOtpCode').value  = '';
+    document.getElementById('verification_code').value  = '';
+    document.getElementById('valoracion').value = '0';
     _revStars = 0;
     document.querySelectorAll('#revStarsInput span').forEach(function(s) { s.classList.remove('on'); });
 
@@ -8238,11 +8223,10 @@ async function verifyAndPublish() {
 
     _revPage = 0; await _fetchRevs(0, false);
     _loadAvgRating();
-  } catch(e) {
-    _revMsg(e.message || 'Código incorrecto o expirado. Compruébalo e inténtalo de nuevo.', 'err');
-  } finally {
-    btn.disabled = false; btn.textContent = 'Confirmar y publicar reseña →';
+  } else {
+    _revMsg(result.error || 'Código incorrecto o expirado. Compruébalo e inténtalo de nuevo.', 'err');
   }
+  btn.disabled = false; btn.textContent = 'Confirmar y publicar reseña →';
 }
 
 /*
@@ -8318,6 +8302,16 @@ function setCookiePref(val) {
     if (banner) banner.style.display = 'flex';
   }
 })();
+</script>
+
+<!-- Funciones de verificación de reseñas -->
+<script src="review_verification_functions.js"></script>
+<script>
+  // Puentes: expone las funciones del .js al código principal usando _sb como cliente
+  window._submitReviewFn   = submitReview;
+  window._verifyReviewCodeFn = verifyReviewCode;
+  // Expone _sb para que verifyReviewCode y getVerifiedReviews puedan usarlo
+  window.supabaseClient = _sb;
 </script>
 
 <!-- js-ready marker -->
