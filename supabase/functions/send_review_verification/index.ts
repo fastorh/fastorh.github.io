@@ -24,6 +24,8 @@ Deno.serve(async (req: Request) => {
     const SUPABASE_SVC_KEY  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const BREVO_API_KEY     = Deno.env.get('BREVO_API_KEY')!
 
+    console.log('[1] Secrets cargados — BREVO presente:', !!BREVO_API_KEY)
+
     // Insertar reseña con verified=false
     const insRes = await fetch(`${SUPABASE_URL}/rest/v1/reviews`, {
       method: 'POST',
@@ -37,16 +39,19 @@ Deno.serve(async (req: Request) => {
     })
 
     if (!insRes.ok) {
-      console.error('Insert review error:', await insRes.text())
-      return new Response(JSON.stringify({ error: 'Error al guardar la reseña' }), { status: 500, headers: corsHeaders })
+      const errText = await insRes.text()
+      console.error('[2] Insert review error:', insRes.status, errText)
+      return new Response(JSON.stringify({ error: 'Error al guardar la reseña', detail: errText }), { status: 500, headers: corsHeaders })
     }
 
     const reviewData = await insRes.json()
     const reviewId = reviewData[0]?.id
+    console.log('[2] Reseña insertada — reviewId:', reviewId)
 
     // Generar código de 6 dígitos
     const code      = String(Math.floor(100000 + Math.random() * 900000))
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
+    console.log('[3] Código generado, guardando en verification_codes...')
 
     // Guardar código de verificación
     const codeRes = await fetch(`${SUPABASE_URL}/rest/v1/verification_codes`, {
@@ -61,9 +66,11 @@ Deno.serve(async (req: Request) => {
     })
 
     if (!codeRes.ok) {
-      console.error('Insert code error:', await codeRes.text())
-      return new Response(JSON.stringify({ error: 'Error al generar el código' }), { status: 500, headers: corsHeaders })
+      const errText = await codeRes.text()
+      console.error('[3] Insert verification_code error:', codeRes.status, errText)
+      return new Response(JSON.stringify({ error: 'Error al generar el código', detail: errText }), { status: 500, headers: corsHeaders })
     }
+    console.log('[3] Código guardado OK, enviando email...')
 
     // Enviar email con código via Brevo
     const emailRes = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -96,10 +103,12 @@ Deno.serve(async (req: Request) => {
     })
 
     if (!emailRes.ok) {
-      console.error('Brevo error:', await emailRes.text())
-      return new Response(JSON.stringify({ error: 'Error al enviar el email' }), { status: 500, headers: corsHeaders })
+      const errText = await emailRes.text()
+      console.error('[4] Brevo error:', emailRes.status, errText)
+      return new Response(JSON.stringify({ error: 'Error al enviar el email', detail: errText }), { status: 500, headers: corsHeaders })
     }
 
+    console.log('[4] Email enviado OK')
     return new Response(JSON.stringify({ success: true, reviewId, message: 'Código enviado al email' }), { status: 200, headers: corsHeaders })
 
   } catch (err) {
