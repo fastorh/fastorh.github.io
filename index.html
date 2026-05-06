@@ -55,7 +55,7 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7245787137844032" crossorigin="anonymous"></script>
 
   <!-- Supabase JS (reseñas) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
 
   <!-- Performance: DNS prefetch + preload fonts -->
   <link rel="dns-prefetch" href="https://fonts.googleapis.com">
@@ -8307,11 +8307,14 @@ function setCookiePref(val) {
 <!-- Funciones de verificación de reseñas -->
 <script src="review_verification_functions.js"></script>
 <script>
-  // Puentes: expone las funciones del .js al código principal usando _sb como cliente
-  window._submitReviewFn   = submitReview;
+  window.supabaseClient      = _sb;
+  window._submitReviewFn     = submitReview;
   window._verifyReviewCodeFn = verifyReviewCode;
-  // Expone _sb para que verifyReviewCode y getVerifiedReviews puedan usarlo
-  window.supabaseClient = _sb;
+  if (_sb) {
+    console.log('[IndexFreedom] Supabase client OK — review functions listas');
+  } else {
+    console.error('[IndexFreedom] ERROR: Supabase client no inicializado');
+  }
 </script>
 
 <!-- js-ready marker -->
