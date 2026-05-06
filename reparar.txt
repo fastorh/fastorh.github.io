@@ -1,0 +1,79 @@
+PROMPT PARA CLAUDE CODE - SISTEMA DE VERIFICACIÓN DE EMAIL EN RESEÑAS
+
+Necesito solucionar el sistema de verificación de email en la sección de reseñas de mi web de IndexFreedom.
+
+PROBLEMA ACTUAL:
+1. Cuando un usuario intenta enviar una reseña, recibe un error: "Error al enviar el código. Comprueba el email e inténtalo de nuevo"
+2. Llega un email con "Confirm your signup" pero NO contiene ningún código de 6 dígitos
+3. Al hacer clic en confirmar, redirige a `localhost:3000` y se queda muerto
+4. El flujo no funciona correctamente
+
+LO QUE NECESITO:
+
+Sistema de verificación de email por CÓDIGO:
+
+1. GENERACIÓN DE CÓDIGO:
+   - Cuando el usuario envía una reseña y hace clic en "Verificar email"
+   - Sistema genera un código RANDOM de 6 dígitos (ej: 123456)
+   - Este código se guarda temporalmente (válido por 10 minutos)
+
+2. EMAIL QUE SE ENVÍA:
+   - Email automático al correo del usuario
+   - Asunto: "Código de verificación - IndexFreedom"
+   - Contenido debe incluir:
+     * Mensaje de bienvenida
+     * EL CÓDIGO DE 6 DÍGITOS claramente visible
+     * Instrucciones: "Introduce este código en la web para verificar tu email"
+     * Aviso: "Este código expira en 10 minutos"
+
+3. VALIDACIÓN EN LA WEB:
+   - Aparece un campo de entrada para que el usuario pegue el código
+   - Usuario escribe el código que recibió por email
+   - Sistema valida que sea correcto
+   - Si es correcto: reseña se publica
+   - Si es incorrecto: muestra error y permite reintentar
+   - Si expira: permite solicitar un nuevo código
+
+4. FLUJO COMPLETO:
+   - Usuario llena formulario: Nombre, Apellido, Email, Valoración, Reseña
+   - Hace clic en "Verificar email y publicar"
+   - Sistema envía código al email
+   - Usuario recibe email CON EL CÓDIGO visible
+   - Usuario copia el código
+   - Aparece modal/campo para introducir código
+   - Usuario pega código
+   - Sistema valida
+   - Si es válido: reseña se guarda y publica ✅
+   - Si es inválido: error, puede reintentar
+
+5. BACKEND REQUERIDO:
+   - Integración con Supabase (que ya está configurado)
+   - Tabla de "verification_codes" con: email, código, timestamp creación, usado (boolean)
+   - Función que envía email (usando Supabase Auth o servicio externo)
+   - API endpoint para validar código
+   - Limpieza automática de códigos expirados
+
+6. MENSAJES DE ERROR CLAROS:
+   - "Código incorrecto. Intenta de nuevo"
+   - "Código expirado. Solicita un nuevo código"
+   - "Email no válido"
+   - "Error al enviar email. Intenta de nuevo"
+
+7. UI/UX:
+   - Formulario inicial: Nombre, Apellido, Email, Valoración, Reseña
+   - Botón: "Verificar email y publicar"
+   - Modal de verificación con campo para pegar código
+   - Botón para solicitar nuevo código si expiró
+   - Contador de segundos restantes para expiración
+
+NO QUIERO:
+- Redireccionamientos a localhost
+- Emails sin código visible
+- Flujos rotos
+- Códigos aleatorios sin guardar
+
+QUIERO:
+- Código de 6 dígitos generado y enviado por email
+- Usuario introduce ese código específico
+- Sistema valida que coincida
+- Reseña se publica cuando código es correcto

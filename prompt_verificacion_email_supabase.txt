@@ -1,0 +1,141 @@
+PROMPT PARA CLAUDE CODE - SISTEMA DE VERIFICACIÓN DE EMAIL EN RESEÑAS CON SUPABASE
+
+Necesito solucionar el sistema de verificación de email en la sección de reseñas de mi web IndexFreedom, integrando Supabase.
+
+CREDENCIALES DE SUPABASE:
+- URL de Supabase: https://issrjtjwjzdyruhgzhl.supabase.co
+- Clave pública de API: sb_publishable_4qZ_NHLmrH0umY4xxE--VA_aV4gevX5
+- Proyecto: IndexFreedom
+
+PROBLEMA ACTUAL:
+1. Cuando un usuario intenta enviar una reseña, recibe error: "Error al enviar el código. Comprueba el email e inténtalo de nuevo"
+2. Llega un email con "Confirm your signup" pero NO contiene código de 6 dígitos
+3. Al hacer clic en confirmar, redirige a localhost:3000 y se queda muerto
+4. El flujo no funciona correctamente
+
+LO QUE NECESITO:
+
+Sistema de verificación de email por CÓDIGO con Supabase:
+
+1. GENERACIÓN DE CÓDIGO:
+   - Cuando el usuario envía una reseña y hace clic en "Verificar email"
+   - Sistema genera un código RANDOM de 6 dígitos (ej: 123456)
+   - Este código se guarda en tabla Supabase "verification_codes" con:
+     * email (string)
+     * codigo (string - 6 dígitos)
+     * created_at (timestamp)
+     * expires_at (timestamp - 10 minutos)
+     * usado (boolean - false al crear)
+   - Código válido por 10 minutos
+
+2. EMAIL QUE SE ENVÍA:
+   - Usa Supabase Auth o servicio de email (Resend, SendGrid, etc.)
+   - Asunto: "Código de verificación - IndexFreedom"
+   - Contenido HTML con:
+     * Mensaje de bienvenida
+     * EL CÓDIGO DE 6 DÍGITOS claramente visible (ej: en grande, monoespaciado)
+     * Instrucciones: "Introduce este código en la web para verificar tu email"
+     * Aviso: "Este código expira en 10 minutos"
+     * No incluyas link, solo el código
+
+3. VALIDACIÓN EN LA WEB:
+   - Aparece modal/campo después de "Verificar email y publicar"
+   - Usuario pega el código que recibió por email
+   - Sistema valida que:
+     * El código sea correcto
+     * No haya expirado (comparar con expires_at)
+     * No esté ya usado (usado = false)
+   - Si es correcto: marca como usado, publica reseña ✅
+   - Si es incorrecto: muestra error "Código incorrecto. Intenta de nuevo"
+   - Si expira: permite solicitar nuevo código
+
+4. FLUJO COMPLETO:
+   Paso 1: Usuario llena formulario: Nombre, Apellido, Email, Valoración, Reseña
+   Paso 2: Hace clic en "Verificar email y publicar"
+   Paso 3: Sistema genera código (6 dígitos) y guarda en Supabase
+   Paso 4: Sistema envía email CON EL CÓDIGO visible
+   Paso 5: Usuario recibe email con código
+   Paso 6: Usuario copia el código
+   Paso 7: Aparece modal/campo para introducir código
+   Paso 8: Usuario pega código en la web
+   Paso 9: Sistema valida en Supabase
+   Paso 10: Si es válido: reseña se guarda en tabla "resenas" y publica ✅
+   Paso 11: Si es inválido: error, puede reintentar
+
+5. TABLAS SUPABASE REQUERIDAS:
+
+   Tabla "verification_codes":
+   - id (uuid, primary key)
+   - email (text)
+   - codigo (text - 6 dígitos)
+   - created_at (timestamp)
+   - expires_at (timestamp)
+   - usado (boolean, default false)
+
+   Tabla "resenas" (ya existe probablemente):
+   - id (uuid, primary key)
+   - nombre (text)
+   - apellido (text)
+   - email (text)
+   - valoracion (integer 1-5)
+   - resena (text)
+   - verificado (boolean)
+   - created_at (timestamp)
+
+6. FUNCIONALIDAD DE BACKEND:
+   - Función para generar código aleatorio (6 dígitos)
+   - Función para enviar email con código
+   - API endpoint para validar código:
+     * POST /api/verify-code
+     * Body: {email, codigo}
+     * Response: {valido: true/false, mensaje: "..."}
+   - Función para limpiar códigos expirados (ejecutar cada hora)
+   - Integración con Supabase JavaScript client
+
+7. MENSAJES DE ERROR CLAROS:
+   - "Código incorrecto. Intenta de nuevo"
+   - "Código expirado. Solicita un nuevo código"
+   - "Email no válido"
+   - "Error al enviar email. Intenta de nuevo"
+   - "La reseña se publicó correctamente"
+
+8. UI/UX:
+   - Formulario inicial: Nombre, Apellido, Email, Valoración, Reseña
+   - Botón: "Verificar email y publicar"
+   - Modal de verificación:
+     * Campo para pegar código (ej: 6 cajas, una para cada dígito)
+     * Botón: "Verificar código"
+     * Botón: "Solicitar nuevo código" (si expiró)
+     * Contador de segundos restantes (10:00 → 0:00)
+     * Mensaje: "Se enviará nuevo código en X segundos"
+   - Mensajes claros de estado (cargando, éxito, error)
+
+9. SEGURIDAD:
+   - Nunca expongas la clave secreta (service_role)
+   - Usa solo clave pública (publishable) en cliente
+   - Valida SIEMPRE en servidor/Supabase
+   - Rate limiting: máximo 3 intentos fallidos por email en 1 hora
+   - Limpia códigos expirados automáticamente
+   - No muestres en logs ningún código completo
+
+10. IMPLEMENTACIÓN TÉCNICA:
+    - Usa Supabase JavaScript client
+    - Supabase URL: https://issrjtjwjzdyruhgzhl.supabase.co
+    - Clave pública: sb_publishable_4qZ_NHLmrH0umY4xxE--VA_aV4gevX5
+    - Para enviar emails: usa Edge Functions de Supabase o servicio externo (Resend)
+    - Valida códigos mediante queries a Supabase desde cliente o servidor
+
+NO QUIERO:
+- Redireccionamientos a localhost
+- Emails sin código visible
+- Flujos rotos
+- Códigos sin validación
+- Exponer claves secretas
+
+QUIERO:
+- Código de 6 dígitos generado y enviado por email
+- Usuario introduce ese código específico en un campo
+- Sistema valida que coincida exactamente
+- Reseña se publica cuando código es correcto y válido
+- Todo integrado con Supabase correctamente
+- Flujo completo y funcional sin errores
