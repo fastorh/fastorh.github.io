@@ -4754,17 +4754,21 @@
         <!-- PASO 2: Verificación OTP -->
         <div id="revFormStep2" style="display:none">
           <h3>📬 Verifica tu email</h3>
-          <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:20px">
+          <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:16px">
             Hemos enviado un código de <strong style="color:var(--t1)">6 dígitos</strong> a tu Gmail.<br>
             Revisa tu bandeja de entrada (y la carpeta de spam por si acaso).
           </p>
+          <div style="text-align:center;margin-bottom:18px;font-size:13px;color:var(--t3)">
+            Código válido durante: <span id="revOtpTimer" style="font-weight:700;color:var(--green)">10:00</span>
+          </div>
           <div class="rev-field">
             <label>Código de verificación *</label>
             <input type="text" id="revOtpCode" placeholder="000000" maxlength="6" inputmode="numeric"
               style="font-size:24px;letter-spacing:8px;text-align:center;font-weight:700">
           </div>
           <button class="btn btn-p rev-submit" id="revVerifyBtn" onclick="verifyAndPublish()">Confirmar y publicar reseña →</button>
-          <button onclick="backToRevForm()" style="background:none;border:none;color:var(--t3);font-size:12px;cursor:pointer;margin-top:10px;display:block;text-align:center;width:100%">← Volver al formulario</button>
+          <button id="revResendBtn" onclick="resendOtp()" style="background:none;border:none;color:var(--green);font-size:12px;cursor:pointer;margin-top:10px;display:none;text-align:center;width:100%">↺ Solicitar nuevo código</button>
+          <button onclick="backToRevForm()" style="background:none;border:none;color:var(--t3);font-size:12px;cursor:pointer;margin-top:6px;display:block;text-align:center;width:100%">← Volver al formulario</button>
         </div>
 
         <div class="rev-msg" id="revMsg"></div>
@@ -8080,14 +8084,42 @@ function _revMsg(t, cls) {
 }
 
 function backToRevForm() {
+  _revStopTimer();
   document.getElementById('revFormStep1').style.display = '';
   document.getElementById('revFormStep2').style.display = 'none';
   document.getElementById('revOtpCode').value = '';
   _revMsg('', '');
 }
 
+var _revTimerInterval = null;
+var _revTimerSecs = 600;
+
+function _revStartTimer() {
+  _revStopTimer();
+  _revTimerSecs = 600;
+  var timerEl = document.getElementById('revOtpTimer');
+  var resendBtn = document.getElementById('revResendBtn');
+  if (resendBtn) resendBtn.style.display = 'none';
+  if (timerEl) { timerEl.textContent = '10:00'; timerEl.style.color = 'var(--green)'; }
+  _revTimerInterval = setInterval(function() {
+    _revTimerSecs--;
+    var m = Math.floor(_revTimerSecs / 60);
+    var s = _revTimerSecs % 60;
+    if (timerEl) timerEl.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+    if (_revTimerSecs <= 0) {
+      _revStopTimer();
+      if (timerEl) { timerEl.textContent = 'Expirado'; timerEl.style.color = '#ef4444'; }
+      if (resendBtn) resendBtn.style.display = 'block';
+      _revMsg('El código ha expirado. Solicita uno nuevo.', 'err');
+    }
+  }, 1000);
+}
+
+function _revStopTimer() {
+  if (_revTimerInterval) { clearInterval(_revTimerInterval); _revTimerInterval = null; }
+}
+
 async function submitReview() {
-  if (!_sb) { alert('Configura Supabase primero (REV_URL y REV_KEY).'); return; }
   if (document.getElementById('revHoneypot').value) return;
 
   if (localStorage.getItem('if_rev_done'))
@@ -8110,28 +8142,57 @@ async function submitReview() {
   _revMsg('', '');
 
   try {
-    var { error } = await _sb.auth.signInWithOtp({
-      email: email,
-      options: { shouldCreateUser: true }
+    var res = await fetch('/.netlify/functions/send-review-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, nombre: nombre, apellido: apellido, texto: texto, estrellas: _revStars })
     });
-    if (error) throw error;
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error al enviar el código');
 
     document.getElementById('revFormStep1').style.display = 'none';
     document.getElementById('revFormStep2').style.display = 'block';
+    _revStartTimer();
     _revMsg('Código enviado a ' + email + '. Revisa tu bandeja (y spam).', 'ok');
   } catch(e) {
-    _revMsg('Error al enviar el código. Comprueba el email e inténtalo de nuevo.', 'err');
+    _revMsg(e.message || 'Error al enviar el código. Comprueba el email e inténtalo de nuevo.', 'err');
   } finally {
     btn.disabled = false; btn.textContent = 'Verificar email y publicar →';
   }
 }
 
-async function verifyAndPublish() {
-  var otp      = (document.getElementById('revOtpCode').value || '').trim();
+async function resendOtp() {
   var email    = document.getElementById('revEmail').value.trim().toLowerCase();
   var nombre   = document.getElementById('revNombre').value.trim();
   var apellido = document.getElementById('revApellido').value.trim();
   var texto    = document.getElementById('revTexto').value.trim();
+  var btn = document.getElementById('revResendBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Enviando…'; }
+  _revMsg('', '');
+
+  try {
+    var res = await fetch('/.netlify/functions/send-review-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, nombre: nombre, apellido: apellido, texto: texto, estrellas: _revStars })
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error al reenviar el código');
+
+    document.getElementById('revOtpCode').value = '';
+    _revStartTimer();
+    _revMsg('Nuevo código enviado a ' + email + '. Revisa tu bandeja (y spam).', 'ok');
+  } catch(e) {
+    _revMsg(e.message || 'Error al reenviar el código. Inténtalo de nuevo.', 'err');
+    if (btn) btn.style.display = 'block';
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '↺ Solicitar nuevo código'; }
+  }
+}
+
+async function verifyAndPublish() {
+  var otp   = (document.getElementById('revOtpCode').value || '').trim();
+  var email = document.getElementById('revEmail').value.trim().toLowerCase();
 
   if (!otp || otp.length < 6) return _revMsg('Introduce el código de 6 dígitos que has recibido.', 'err');
 
@@ -8140,17 +8201,15 @@ async function verifyAndPublish() {
   _revMsg('', '');
 
   try {
-    var { error: otpErr } = await _sb.auth.verifyOtp({
-      email: email, token: otp, type: 'email'
+    var res = await fetch('/.netlify/functions/verify-review-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, code: otp })
     });
-    if (otpErr) throw otpErr;
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Código incorrecto o expirado');
 
-    var { error: insErr } = await _sb.from('reviews').insert({
-      email: email, nombre: nombre, apellido: apellido,
-      texto: texto, estrellas: _revStars, visible: true
-    });
-    if (insErr) throw insErr;
-
+    _revStopTimer();
     localStorage.setItem('if_rev_done', '1');
     _revMsg('¡Reseña publicada! Gracias por compartir tu experiencia 🙌', 'ok');
 
@@ -8165,14 +8224,13 @@ async function verifyAndPublish() {
     _revStars = 0;
     document.querySelectorAll('#revStarsInput span').forEach(function(s) { s.classList.remove('on'); });
 
-    // Bloquear el botón de envío permanentemente en esta sesión
     var sb1 = document.getElementById('revSubmitBtn');
     if (sb1) { sb1.disabled = true; sb1.textContent = 'Ya has publicado tu reseña ✓'; }
 
     _revPage = 0; await _fetchRevs(0, false);
     _loadAvgRating();
   } catch(e) {
-    _revMsg('Código incorrecto o expirado. Compruébalo e inténtalo de nuevo.', 'err');
+    _revMsg(e.message || 'Código incorrecto o expirado. Compruébalo e inténtalo de nuevo.', 'err');
   } finally {
     btn.disabled = false; btn.textContent = 'Confirmar y publicar reseña →';
   }
@@ -8181,6 +8239,33 @@ async function verifyAndPublish() {
 /*
   ── SQL PARA SUPABASE (ejecuta esto en el SQL Editor de tu proyecto) ──────
 
+  -- 1) TABLA DE CÓDIGOS DE VERIFICACIÓN (necesaria para el envío de OTP)
+  create table public.verification_codes (
+    id         uuid        default gen_random_uuid() primary key,
+    email      text        not null,
+    code       text        not null,
+    nombre     text        not null,
+    apellido   text        not null,
+    texto      text        not null,
+    estrellas  integer     not null check (estrellas between 1 and 5),
+    used       boolean     not null default false,
+    expires_at timestamptz not null,
+    created_at timestamptz default now()
+  );
+
+  alter table public.verification_codes enable row level security;
+  -- Las funciones Netlify usan service key (bypass RLS), no se necesitan políticas públicas
+
+  -- Índice para búsquedas rápidas al validar el código
+  create index idx_verification_codes_lookup
+    on public.verification_codes (email, code, used, expires_at);
+
+  -- Limpieza automática de códigos expirados (ejecutar una vez)
+  create or replace function delete_expired_codes() returns void language sql as $$
+    delete from public.verification_codes where expires_at < now();
+  $$;
+
+  -- 2) TABLA DE RESEÑAS
   create table public.reviews (
     id         uuid        default gen_random_uuid() primary key,
     email      text        not null,
@@ -8203,6 +8288,12 @@ async function verifyAndPublish() {
 
   create policy "select_publico" on public.reviews
     for select using (visible = true);
+
+  -- 3) VARIABLES DE ENTORNO NECESARIAS EN NETLIFY (Settings → Environment variables):
+  --    SUPABASE_URL         = https://XXXXXXXXX.supabase.co
+  --    SUPABASE_SERVICE_KEY = tu service_role key (Settings → API en Supabase)
+  --    RESEND_API_KEY       = tu API key de resend.com
+  --    EMAIL_FROM           = IndexFreedom <noreply@indexfreedom.xyz>  (dominio verificado en Resend)
 
   ─────────────────────────────────────────────────────────────────────── */
 
