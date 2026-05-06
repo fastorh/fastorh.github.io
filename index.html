@@ -4748,7 +4748,7 @@
             <textarea id="texto" placeholder="Cuéntanos tu experiencia: qué herramienta usas, cómo te ha ayudado..." maxlength="500"></textarea>
             <span class="rev-char-count" id="revCharCount">0 / 500</span>
           </div>
-          <button class="btn btn-p rev-submit" id="revSubmitBtn" onclick="submitReview()">Verificar email y publicar →</button>
+          <button class="btn btn-p rev-submit" id="revSubmitBtn" onclick="handleSubmitReview()">Verificar email y publicar →</button>
           <p class="rev-legal">Tu email no se mostrará públicamente. Recibirás un código de verificación para confirmar que el correo es tuyo.</p>
         </div>
 
@@ -8124,7 +8124,8 @@ function _revStopTimer() {
 
 var _currentReviewId = null;
 
-async function submitReview() {
+async function handleSubmitReview() {
+  console.log('[IndexFreedom] handleSubmitReview ejecutado');
   if (document.getElementById('revHoneypot').value) return;
   if (localStorage.getItem('if_rev_done'))
     return _revMsg('Ya has publicado una reseña desde este dispositivo. ¡Muchas gracias!', 'err');
