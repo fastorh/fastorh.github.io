@@ -8142,9 +8142,9 @@ async function submitReview() {
   _revMsg('', '');
 
   try {
-    var res = await fetch('/.netlify/functions/send-review-otp', {
+    var res = await fetch('https://issrjxtjwjzdyruhgzhl.supabase.co/functions/v1/send-review-otp', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + REV_KEY },
       body: JSON.stringify({ email: email, nombre: nombre, apellido: apellido, texto: texto, estrellas: _revStars })
     });
     var data = await res.json();
@@ -8171,9 +8171,9 @@ async function resendOtp() {
   _revMsg('', '');
 
   try {
-    var res = await fetch('/.netlify/functions/send-review-otp', {
+    var res = await fetch('https://issrjxtjwjzdyruhgzhl.supabase.co/functions/v1/send-review-otp', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + REV_KEY },
       body: JSON.stringify({ email: email, nombre: nombre, apellido: apellido, texto: texto, estrellas: _revStars })
     });
     var data = await res.json();
@@ -8201,9 +8201,9 @@ async function verifyAndPublish() {
   _revMsg('', '');
 
   try {
-    var res = await fetch('/.netlify/functions/verify-review-otp', {
+    var res = await fetch('https://issrjxtjwjzdyruhgzhl.supabase.co/functions/v1/verify-review-otp', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + REV_KEY },
       body: JSON.stringify({ email: email, code: otp })
     });
     var data = await res.json();
