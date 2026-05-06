@@ -54,8 +54,6 @@
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7245787137844032" crossorigin="anonymous"></script>
 
-  <!-- Supabase JS (reseñas) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
 
   <!-- Performance: DNS prefetch + preload fonts -->
   <link rel="dns-prefetch" href="https://fonts.googleapis.com">
@@ -2438,7 +2436,6 @@
       </li>
 
       <li><a href="#blog"    onclick="SPA.go('blog');return false;">Blog</a></li>
-      <li><a href="#resenas" onclick="SPA.go('resenas');return false;">Reseñas</a></li>
       <li><a href="#faq"     onclick="SPA.go('faq');return false;">FAQ</a></li>
     </ul>
 
@@ -2504,7 +2501,6 @@
     </div>
 
     <a class="mob-sb-link" href="#blog"    onclick="closeSidebar();SPA.go('blog');return false;">✍️ &nbsp;Blog</a>
-    <a class="mob-sb-link" href="#resenas" onclick="closeSidebar();SPA.go('resenas');return false;">⭐ &nbsp;Reseñas</a>
     <a class="mob-sb-link" href="#faq"     onclick="closeSidebar();SPA.go('faq');return false;">❓ &nbsp;FAQ</a>
   </nav>
 
@@ -2573,12 +2569,6 @@
             € <span id="stat-calc">0</span>M
           </div>
           <div class="hstat-lbl">calculados este mes</div>
-        </div>
-        <div class="hero-stat">
-          <div class="hstat-val">
-            <span id="stat-rating">0.0</span>★
-          </div>
-          <div class="hstat-lbl">valoración media</div>
         </div>
       </div>
     </div>
@@ -4641,150 +4631,8 @@
   .test-text { font-size:13px; color:var(--t2); line-height:1.75; font-style:italic; margin-bottom:14px; }
   .test-since { font-size:11px; color:var(--t3); font-weight:600; text-transform:uppercase; letter-spacing:1px; }
 
-  /* ── RESEÑAS ──────────────────────────────────────────── */
-  .rev-form-wrap { max-width:620px; margin:0 auto 48px; }
-  .rev-form-inner {
-    background:var(--bg-2); border:1px solid var(--br);
-    border-radius:var(--r3); padding:28px 32px;
-  }
-  .rev-form-inner h3 { font-size:15px; font-weight:700; margin-bottom:20px; color:var(--t1); }
-  .rev-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-  .rev-field { display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
-  .rev-field label { font-size:11px; font-weight:600; color:var(--t2); text-transform:uppercase; letter-spacing:.6px; }
-  .rev-field input, .rev-field textarea {
-    background:var(--bg-3); border:1px solid var(--br); border-radius:var(--r1);
-    padding:10px 14px; font-size:14px; color:var(--t1); font-family:inherit;
-    transition:border-color .2s; width:100%; box-sizing:border-box;
-  }
-  .rev-field input:focus, .rev-field textarea:focus { outline:none; border-color:var(--green); }
-  .rev-field textarea { resize:vertical; min-height:90px; }
-  .rev-char-count { font-size:11px; color:var(--t3); text-align:right; margin-top:2px; }
-  .rev-stars-input { display:flex; gap:2px; cursor:pointer; }
-  .rev-stars-input span { font-size:30px; color:var(--br2); transition:color .12s; line-height:1; }
-  .rev-stars-input span.on { color:#f0b428; }
-  .rev-submit { width:100%; justify-content:center; margin-top:6px; }
-  .rev-legal { font-size:11px; color:var(--t3); margin-top:10px; text-align:center; line-height:1.5; }
-  .rev-msg { margin-top:12px; font-size:13px; font-weight:600; text-align:center; min-height:18px; }
-  .rev-msg.ok { color:var(--green); }
-  .rev-msg.err { color:#ef4444; }
-  .rev-list { display:flex; flex-direction:column; gap:10px; max-width:760px; margin:0 auto; }
-  .rev-item {
-    background:var(--bg-2); border:1px solid var(--br); border-radius:var(--r2);
-    padding:16px 20px; display:grid; grid-template-columns:40px 1fr; gap:14px; align-items:start;
-  }
-  .rev-avatar {
-    width:40px; height:40px; border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    font-weight:800; font-size:16px; color:#fff; flex-shrink:0;
-  }
-  .rev-meta { display:flex; align-items:center; gap:8px; margin-bottom:3px; flex-wrap:wrap; }
-  .rev-author { font-size:14px; font-weight:700; color:var(--t1); }
-  .rev-date { font-size:11px; color:var(--t3); }
-  .rev-item-stars { color:#f0b428; font-size:12px; letter-spacing:1px; margin-bottom:5px; }
-  .rev-body { font-size:13px; color:var(--t2); line-height:1.75; font-style:italic; }
-  .rev-empty { text-align:center; color:var(--t3); font-size:14px; padding:40px 0; }
-  .rev-loading { text-align:center; color:var(--t3); font-size:13px; padding:24px 0; }
-  @media(max-width:580px){
-    .rev-row { grid-template-columns:1fr; }
-    .rev-form-inner { padding:20px 16px; }
-    .rev-item { grid-template-columns:34px 1fr; gap:10px; padding:14px 14px; }
-    .rev-avatar { width:34px; height:34px; font-size:14px; }
-  }
 </style>
 
-<section class="test-section" id="testimonios" data-page="resenas">
-  <div class="container">
-    <div class="fi" style="text-align:center;margin-bottom:48px">
-      <span class="sec-label" style="justify-content:center">Comunidad</span>
-      <h2 class="sec-title">Reseñas de la <span class="grad">comunidad</span></h2>
-      <p class="sec-sub" style="margin:0 auto">Comparte tu experiencia con IndexFreedom. Tu reseña aparece al instante.</p>
-      <!-- Valoración media -->
-      <div id="revAvgWrap" style="display:inline-flex;align-items:center;gap:14px;margin-top:28px;background:var(--bg-2);border:1px solid var(--br);border-radius:var(--r2);padding:16px 28px">
-        <div style="text-align:center">
-          <div id="revAvgNum" style="font-size:40px;font-weight:800;color:var(--t1);line-height:1">—</div>
-          <div id="revAvgStars" style="color:#f0b428;font-size:18px;letter-spacing:2px;margin:4px 0"></div>
-          <div id="revAvgCount" style="font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.6px">cargando…</div>
-        </div>
-        <div style="width:1px;height:60px;background:var(--br)"></div>
-        <div style="text-align:left">
-          <div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:2px">Valoración media</div>
-          <div style="font-size:12px;color:var(--t2);line-height:1.5">Basada en reseñas reales<br>de usuarios verificados</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Formulario de reseña -->
-    <div class="rev-form-wrap fi">
-      <div class="rev-form-inner">
-        <!-- Honeypot antispam -->
-        <input type="text" id="revHoneypot" style="display:none" tabindex="-1" autocomplete="off">
-
-        <!-- PASO 1: Datos de la reseña -->
-        <div id="revFormStep1">
-          <h3>✍️ Escribe tu reseña</h3>
-          <div class="rev-row">
-            <div class="rev-field">
-              <label>Nombre *</label>
-              <input type="text" id="nombre" placeholder="Ej: Carlos" maxlength="50">
-            </div>
-            <div class="rev-field">
-              <label>Primer apellido *</label>
-              <input type="text" id="primer_apellido" placeholder="Ej: Martínez" maxlength="50">
-            </div>
-          </div>
-          <div class="rev-field">
-            <label>Email (@gmail.com obligatorio) *</label>
-            <input type="email" id="email" placeholder="tunombre@gmail.com">
-          </div>
-          <div class="rev-field">
-            <label>Valoración *</label>
-            <div class="rev-stars-input" id="revStarsInput">
-              <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
-            </div>
-            <input type="hidden" id="valoracion" value="0">
-          </div>
-          <div class="rev-field">
-            <label>Tu reseña * &nbsp;<span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">(mín. 20 · máx. 500 caracteres)</span></label>
-            <textarea id="texto" placeholder="Cuéntanos tu experiencia: qué herramienta usas, cómo te ha ayudado..." maxlength="500"></textarea>
-            <span class="rev-char-count" id="revCharCount">0 / 500</span>
-          </div>
-          <button class="btn btn-p rev-submit" id="revSubmitBtn" onclick="handleSubmitReview()">Verificar email y publicar →</button>
-          <p class="rev-legal">Tu email no se mostrará públicamente. Recibirás un código de verificación para confirmar que el correo es tuyo.</p>
-        </div>
-
-        <!-- PASO 2: Verificación OTP -->
-        <div id="revFormStep2" style="display:none">
-          <h3>📬 Verifica tu email</h3>
-          <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:16px">
-            Hemos enviado un código de <strong style="color:var(--t1)">6 dígitos</strong> a tu Gmail.<br>
-            Revisa tu bandeja de entrada (y la carpeta de spam por si acaso).
-          </p>
-          <div style="text-align:center;margin-bottom:18px;font-size:13px;color:var(--t3)">
-            Código válido durante: <span id="revOtpTimer" style="font-weight:700;color:var(--green)">10:00</span>
-          </div>
-          <div class="rev-field">
-            <label>Código de verificación *</label>
-            <input type="text" id="verification_code" placeholder="000000" maxlength="6" inputmode="numeric"
-              style="font-size:24px;letter-spacing:8px;text-align:center;font-weight:700">
-          </div>
-          <button class="btn btn-p rev-submit" id="revVerifyBtn" onclick="verifyAndPublish()">Confirmar y publicar reseña →</button>
-          <button id="revResendBtn" onclick="resendOtp()" style="background:none;border:none;color:var(--green);font-size:12px;cursor:pointer;margin-top:10px;display:none;text-align:center;width:100%">↺ Solicitar nuevo código</button>
-          <button onclick="backToRevForm()" style="background:none;border:none;color:var(--t3);font-size:12px;cursor:pointer;margin-top:6px;display:block;text-align:center;width:100%">← Volver al formulario</button>
-        </div>
-
-        <div class="rev-msg" id="revMsg"></div>
-      </div>
-    </div>
-
-    <!-- Listado de reseñas -->
-    <div id="revList" class="rev-list">
-      <div class="rev-loading">Cargando reseñas…</div>
-    </div>
-    <div style="text-align:center;margin-top:24px">
-      <button class="btn btn-o" id="revMoreBtn" style="display:none" onclick="loadMoreReviews()">Ver más reseñas</button>
-    </div>
-  </div>
-</section>
 
 <!-- ╔══════════════════════════════════════════════════╗ -->
 <!-- ║  NEWSLETTER BANNER                               ║ -->
@@ -5976,7 +5824,6 @@ var BC_LABELS = {
   'errores':'Errores a evitar', 'regla4':'Regla del 4%',
   'jubilacion':'Jubilación Real', 'faq':'FAQ',
   'blog':'Blog', 'simulador-inflacion':'Simulador de Inflación',
-  'resenas':'Reseñas',
 };
 var BC_PARENT = {
   'comparador':'fondos','cartera':'fondos',
@@ -7760,7 +7607,6 @@ var SPA = (function () {
     'jubilacion':  ['jubilacion'],
     'simulador-inflacion': ['simulador-inflacion'],
     'blog':        ['blog', 'glosario'],
-    'resenas':     ['testimonios'],
     'faq':         ['faq', 'newsletter'],
     'aviso-legal': ['aviso-legal'],
     'privacidad':  ['privacidad'],
@@ -7943,354 +7789,6 @@ function calcInflacion2() {
 }
 
 
-/* ── RESEÑAS (Supabase) ──────────────────────────────────────
-   CONFIGURACIÓN:
-   1. Ve a https://supabase.com y crea un proyecto gratuito
-   2. En el SQL Editor ejecuta el SQL que está en el comentario
-      al final de esta sección
-   3. Ve a Settings → API y copia tus credenciales abajo
-   ────────────────────────────────────────────────────────── */
-const REV_URL = 'https://issrjxtjwjzdyruhgzhl.supabase.co';
-const REV_KEY = 'sb_publishable_4qZ_NHLmrH0umY4xxE--VA_aV4gevX5';
-
-const _sb = (typeof supabase !== 'undefined' && !REV_URL.includes('XXXX'))
-  ? supabase.createClient(REV_URL, REV_KEY)
-  : null;
-
-let _revPage = 0;
-const _revLimit = 6;
-let _revStars = 0;
-
-/* Inicializar estrellas + contador de chars + carga inicial */
-document.addEventListener('DOMContentLoaded', function() {
-  var stars = document.querySelectorAll('#revStarsInput span');
-  stars.forEach(function(s) {
-    s.addEventListener('mouseenter', function() {
-      var v = +s.dataset.v;
-      stars.forEach(function(x) { x.classList.toggle('on', +x.dataset.v <= v); });
-    });
-    s.addEventListener('mouseleave', function() {
-      stars.forEach(function(x) { x.classList.toggle('on', +x.dataset.v <= _revStars); });
-    });
-    s.addEventListener('click', function() {
-      _revStars = +s.dataset.v;
-      stars.forEach(function(x) { x.classList.toggle('on', +x.dataset.v <= _revStars); });
-      var valInput = document.getElementById('valoracion');
-      if (valInput) valInput.value = _revStars;
-    });
-  });
-  var ta = document.getElementById('texto');
-  if (ta) ta.addEventListener('input', function() {
-    document.getElementById('revCharCount').textContent = ta.value.length + ' / 500';
-  });
-  loadReviews();
-  _loadAvgRating();
-
-  // Bloquear formulario si ya publicó desde este dispositivo
-  if (localStorage.getItem('if_rev_done')) {
-    var sb1 = document.getElementById('revSubmitBtn');
-    if (sb1) { sb1.disabled = true; sb1.textContent = 'Ya has publicado tu reseña ✓'; }
-  }
-});
-
-function _revEsc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function _revColor(name) {
-  var c = ['#00d46a','#f0b428','#60a5fa','#f472b6','#a78bfa','#34d399','#fb923c'];
-  var h = 0; for (var i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))&0xffff;
-  return c[h % c.length];
-}
-function _revDate(iso) {
-  var d = new Date(iso), s = Math.floor((Date.now()-d)/1000);
-  if (s < 60) return 'justo ahora';
-  if (s < 3600) return 'hace ' + Math.floor(s/60) + ' min';
-  if (s < 86400) return 'hace ' + Math.floor(s/3600) + 'h';
-  if (s < 604800) return 'hace ' + Math.floor(s/86400) + ' días';
-  return d.toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
-}
-function _revCard(r) {
-  var ini = (r.nombre||'?')[0].toUpperCase();
-  var col = _revColor(r.nombre + (r.primer_apellido||''));
-  var st  = '★'.repeat(r.valoracion) + '☆'.repeat(5-r.valoracion);
-  var nom = _revEsc(r.nombre) + ' ' + _revEsc((r.primer_apellido||'')[0]||'') + '.';
-  return '<div class="rev-item">'
-    + '<div class="rev-avatar" style="background:'+col+'">'+ini+'</div>'
-    + '<div>'
-    + '<div class="rev-meta"><span class="rev-author">'+nom+'</span>'
-    + '<span class="rev-date">'+_revDate(r.created_at)+'</span></div>'
-    + '<div class="rev-item-stars">'+st+'</div>'
-    + '<p class="rev-body">"'+_revEsc(r.texto)+'"</p>'
-    + '</div></div>';
-}
-
-async function _fetchRevs(page, append) {
-  var list = document.getElementById('revList');
-  if (!list) return;
-  if (!_sb) {
-    list.innerHTML = '<div class="rev-empty">Configura Supabase para ver las reseñas.</div>';
-    return;
-  }
-  try {
-    var from = page * _revLimit;
-    var { data, error } = await _sb.from('reviews')
-      .select('nombre,primer_apellido,texto,valoracion,created_at')
-      .eq('verified', true)
-      .order('created_at', { ascending: false })
-      .range(from, from + _revLimit);
-    if (error) throw error;
-    if (!append) list.innerHTML = '';
-    if (!data || data.length === 0) {
-      if (!append) list.innerHTML = '<div class="rev-empty">Sé el primero en dejar una reseña 🙌</div>';
-      document.getElementById('revMoreBtn').style.display = 'none';
-      return;
-    }
-    data.slice(0, _revLimit).forEach(function(r) { list.innerHTML += _revCard(r); });
-    document.getElementById('revMoreBtn').style.display = data.length > _revLimit ? '' : 'none';
-  } catch(e) {
-    if (!append) list.innerHTML = '<div class="rev-empty">No se pudieron cargar las reseñas.</div>';
-  }
-}
-
-function loadReviews()     { _revPage = 0; _fetchRevs(0, false); }
-function loadMoreReviews() { _revPage++;   _fetchRevs(_revPage, true); }
-
-async function _loadAvgRating() {
-  if (!_sb) return;
-  try {
-    var { data } = await _sb.from('reviews')
-      .select('valoracion')
-      .eq('verified', true);
-    if (!data || data.length === 0) return;
-    var sum = data.reduce(function(s, r) { return s + (r.valoracion || 0); }, 0);
-    var avg = sum / data.length;
-    var avgStr = avg.toFixed(1);
-    var fullStars = Math.round(avg);
-
-    // Actualizar stat hero
-    var heroEl = document.getElementById('stat-rating');
-    if (heroEl) heroEl.textContent = avgStr;
-
-    // Actualizar widget en sección reseñas
-    var numEl   = document.getElementById('revAvgNum');
-    var starsEl = document.getElementById('revAvgStars');
-    var cntEl   = document.getElementById('revAvgCount');
-    if (numEl)   numEl.textContent   = avgStr;
-    if (starsEl) starsEl.textContent = '★'.repeat(fullStars) + '☆'.repeat(5 - fullStars);
-    if (cntEl)   cntEl.textContent   = data.length + (data.length === 1 ? ' reseña' : ' reseñas');
-  } catch(e) {}
-}
-
-function _revMsg(t, cls) {
-  var el = document.getElementById('revMsg');
-  if (el) { el.textContent = t; el.className = 'rev-msg ' + (cls || ''); }
-}
-
-function backToRevForm() {
-  _revStopTimer();
-  document.getElementById('revFormStep1').style.display = '';
-  document.getElementById('revFormStep2').style.display = 'none';
-  document.getElementById('verification_code').value = '';
-  _revMsg('', '');
-}
-
-var _revTimerInterval = null;
-var _revTimerSecs = 600;
-
-function _revStartTimer() {
-  _revStopTimer();
-  _revTimerSecs = 600;
-  var timerEl = document.getElementById('revOtpTimer');
-  var resendBtn = document.getElementById('revResendBtn');
-  if (resendBtn) resendBtn.style.display = 'none';
-  if (timerEl) { timerEl.textContent = '10:00'; timerEl.style.color = 'var(--green)'; }
-  _revTimerInterval = setInterval(function() {
-    _revTimerSecs--;
-    var m = Math.floor(_revTimerSecs / 60);
-    var s = _revTimerSecs % 60;
-    if (timerEl) timerEl.textContent = m + ':' + (s < 10 ? '0' : '') + s;
-    if (_revTimerSecs <= 0) {
-      _revStopTimer();
-      if (timerEl) { timerEl.textContent = 'Expirado'; timerEl.style.color = '#ef4444'; }
-      if (resendBtn) resendBtn.style.display = 'block';
-      _revMsg('El código ha expirado. Solicita uno nuevo.', 'err');
-    }
-  }, 1000);
-}
-
-function _revStopTimer() {
-  if (_revTimerInterval) { clearInterval(_revTimerInterval); _revTimerInterval = null; }
-}
-
-var _currentReviewId = null;
-
-async function handleSubmitReview() {
-  console.log('[IndexFreedom] handleSubmitReview ejecutado');
-  if (document.getElementById('revHoneypot').value) return;
-  if (localStorage.getItem('if_rev_done'))
-    return _revMsg('Ya has publicado una reseña desde este dispositivo. ¡Muchas gracias!', 'err');
-
-  var nombre          = document.getElementById('nombre').value.trim();
-  var primer_apellido = document.getElementById('primer_apellido').value.trim();
-  var email           = document.getElementById('email').value.trim().toLowerCase();
-  var texto           = document.getElementById('texto').value.trim();
-
-  if (!nombre          || nombre.length < 2)          return _revMsg('Escribe tu nombre (mínimo 2 letras).', 'err');
-  if (!primer_apellido || primer_apellido.length < 2) return _revMsg('Escribe tu primer apellido (mínimo 2 letras).', 'err');
-  if (!email.endsWith('@gmail.com'))                  return _revMsg('El email debe ser una cuenta @gmail.com.', 'err');
-  if (_revStars < 1)                                  return _revMsg('Selecciona una valoración de 1 a 5 estrellas.', 'err');
-  if (texto.length < 20)                              return _revMsg('La reseña debe tener al menos 20 caracteres.', 'err');
-  if (texto.length > 500)                             return _revMsg('La reseña no puede superar 500 caracteres.', 'err');
-
-  var btn = document.getElementById('revSubmitBtn');
-  btn.disabled = true; btn.textContent = 'Enviando código…';
-  _revMsg('', '');
-
-  var result = await window._submitReviewFn({
-    nombre: nombre,
-    primer_apellido: primer_apellido,
-    email: email,
-    valoracion: _revStars,
-    texto: texto
-  });
-
-  if (result.success) {
-    _currentReviewId = result.reviewId;
-    document.getElementById('revFormStep1').style.display = 'none';
-    document.getElementById('revFormStep2').style.display = 'block';
-    _revStartTimer();
-    _revMsg('Código enviado a ' + email + '. Revisa tu bandeja (y spam).', 'ok');
-  } else {
-    _revMsg(result.error || 'Error al enviar el código. Comprueba el email e inténtalo de nuevo.', 'err');
-  }
-  btn.disabled = false; btn.textContent = 'Verificar email y publicar →';
-}
-
-async function resendOtp() {
-  var email           = document.getElementById('email').value.trim().toLowerCase();
-  var nombre          = document.getElementById('nombre').value.trim();
-  var primer_apellido = document.getElementById('primer_apellido').value.trim();
-  var texto           = document.getElementById('texto').value.trim();
-  var btn = document.getElementById('revResendBtn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Enviando…'; }
-  _revMsg('', '');
-
-  var result = await window._submitReviewFn({
-    nombre: nombre, primer_apellido: primer_apellido,
-    email: email, valoracion: _revStars, texto: texto
-  });
-
-  if (result.success) {
-    _currentReviewId = result.reviewId;
-    document.getElementById('verification_code').value = '';
-    _revStartTimer();
-    _revMsg('Nuevo código enviado a ' + email + '. Revisa tu bandeja (y spam).', 'ok');
-  } else {
-    _revMsg(result.error || 'Error al reenviar el código.', 'err');
-    if (btn) btn.style.display = 'block';
-  }
-  if (btn) { btn.disabled = false; btn.textContent = '↺ Solicitar nuevo código'; }
-}
-
-async function verifyAndPublish() {
-  var code = (document.getElementById('verification_code').value || '').trim();
-  if (!code || code.length < 6) return _revMsg('Introduce el código de 6 dígitos que has recibido.', 'err');
-
-  var btn = document.getElementById('revVerifyBtn');
-  btn.disabled = true; btn.textContent = 'Verificando…';
-  _revMsg('', '');
-
-  var result = await window._verifyReviewCodeFn(_currentReviewId, code);
-
-  if (result.success) {
-    _revStopTimer();
-    localStorage.setItem('if_rev_done', '1');
-    _revMsg('¡Reseña publicada! Gracias por compartir tu experiencia 🙌', 'ok');
-
-    document.getElementById('revFormStep2').style.display = 'none';
-    document.getElementById('revFormStep1').style.display = '';
-    document.getElementById('nombre').value          = '';
-    document.getElementById('primer_apellido').value = '';
-    document.getElementById('email').value           = '';
-    document.getElementById('texto').value           = '';
-    document.getElementById('revCharCount').textContent = '0 / 500';
-    document.getElementById('verification_code').value  = '';
-    document.getElementById('valoracion').value = '0';
-    _revStars = 0;
-    document.querySelectorAll('#revStarsInput span').forEach(function(s) { s.classList.remove('on'); });
-
-    var sb1 = document.getElementById('revSubmitBtn');
-    if (sb1) { sb1.disabled = true; sb1.textContent = 'Ya has publicado tu reseña ✓'; }
-
-    _revPage = 0; await _fetchRevs(0, false);
-    _loadAvgRating();
-  } else {
-    _revMsg(result.error || 'Código incorrecto o expirado. Compruébalo e inténtalo de nuevo.', 'err');
-  }
-  btn.disabled = false; btn.textContent = 'Confirmar y publicar reseña →';
-}
-
-/*
-  ── SQL PARA SUPABASE (ejecuta esto en el SQL Editor de tu proyecto) ──────
-
-  -- 1) TABLA DE CÓDIGOS DE VERIFICACIÓN (necesaria para el envío de OTP)
-  create table public.verification_codes (
-    id         uuid        default gen_random_uuid() primary key,
-    email      text        not null,
-    code       text        not null,
-    nombre     text        not null,
-    apellido   text        not null,
-    texto      text        not null,
-    estrellas  integer     not null check (estrellas between 1 and 5),
-    used       boolean     not null default false,
-    expires_at timestamptz not null,
-    created_at timestamptz default now()
-  );
-
-  alter table public.verification_codes enable row level security;
-  -- Las funciones Netlify usan service key (bypass RLS), no se necesitan políticas públicas
-
-  -- Índice para búsquedas rápidas al validar el código
-  create index idx_verification_codes_lookup
-    on public.verification_codes (email, code, used, expires_at);
-
-  -- Limpieza automática de códigos expirados (ejecutar una vez)
-  create or replace function delete_expired_codes() returns void language sql as $$
-    delete from public.verification_codes where expires_at < now();
-  $$;
-
-  -- 2) TABLA DE RESEÑAS
-  create table public.reviews (
-    id         uuid        default gen_random_uuid() primary key,
-    email      text        not null,
-    nombre     text        not null,
-    apellido   text        not null,
-    texto      text        not null check (char_length(texto) >= 20 and char_length(texto) <= 500),
-    estrellas  integer     not null check (estrellas between 1 and 5),
-    visible    boolean     not null default true,
-    created_at timestamptz default now()
-  );
-
-  alter table public.reviews enable row level security;
-
-  create policy "insert_publico" on public.reviews
-    for insert with check (
-      email like '%@gmail.com'
-      and char_length(nombre)   >= 2
-      and char_length(apellido) >= 2
-    );
-
-  create policy "select_publico" on public.reviews
-    for select using (visible = true);
-
-  -- 3) VARIABLES DE ENTORNO NECESARIAS EN NETLIFY (Settings → Environment variables):
-  --    SUPABASE_URL         = https://XXXXXXXXX.supabase.co
-  --    SUPABASE_SERVICE_KEY = tu service_role key (Settings → API en Supabase)
-  --    RESEND_API_KEY       = tu API key de resend.com
-  --    EMAIL_FROM           = IndexFreedom <noreply@indexfreedom.xyz>  (dominio verificado en Resend)
-
-  ─────────────────────────────────────────────────────────────────────── */
-
 /* ── COOKIE BANNER ────────────────────────────────────────── */
 function setCookiePref(val) {
   localStorage.setItem('if-cookies', val);
@@ -8303,19 +7801,6 @@ function setCookiePref(val) {
     if (banner) banner.style.display = 'flex';
   }
 })();
-</script>
-
-<!-- Funciones de verificación de reseñas -->
-<script src="review_verification_functions.js"></script>
-<script>
-  window.supabaseClient      = _sb;
-  window._submitReviewFn     = submitReview;
-  window._verifyReviewCodeFn = verifyReviewCode;
-  if (_sb) {
-    console.log('[IndexFreedom] Supabase client OK — review functions listas');
-  } else {
-    console.error('[IndexFreedom] ERROR: Supabase client no inicializado');
-  }
 </script>
 
 <!-- js-ready marker -->
