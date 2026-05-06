@@ -4755,7 +4755,7 @@
         <div id="revFormStep2" style="display:none">
           <h3>📬 Verifica tu email</h3>
           <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:16px">
-            Hemos enviado un código de <strong style="color:var(--t1)">6 dígitos</strong> a tu Gmail.<br>
+            Hemos enviado un código de <strong style="color:var(--t1)">8 dígitos</strong> a tu Gmail.<br>
             Revisa tu bandeja de entrada (y la carpeta de spam por si acaso).
           </p>
           <div style="text-align:center;margin-bottom:18px;font-size:13px;color:var(--t3)">
@@ -4763,7 +4763,7 @@
           </div>
           <div class="rev-field">
             <label>Código de verificación *</label>
-            <input type="text" id="revOtpCode" placeholder="000000" maxlength="6" inputmode="numeric"
+            <input type="text" id="revOtpCode" placeholder="00000000" maxlength="8" inputmode="numeric"
               style="font-size:24px;letter-spacing:8px;text-align:center;font-weight:700">
           </div>
           <button class="btn btn-p rev-submit" id="revVerifyBtn" onclick="verifyAndPublish()">Confirmar y publicar reseña →</button>
@@ -8190,7 +8190,7 @@ async function verifyAndPublish() {
   var apellido = document.getElementById('revApellido').value.trim();
   var texto    = document.getElementById('revTexto').value.trim();
 
-  if (!otp || otp.length < 6) return _revMsg('Introduce el código de 6 dígitos que has recibido.', 'err');
+  if (!otp || otp.length < 8) return _revMsg('Introduce el código de 8 dígitos que has recibido.', 'err');
 
   var btn = document.getElementById('revVerifyBtn');
   btn.disabled = true; btn.textContent = 'Verificando…';
