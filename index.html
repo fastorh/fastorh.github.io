@@ -2357,6 +2357,69 @@
       0%   { background-position: 0% center; }
       100% { background-position: 200% center; }
     }
+
+    /* ── LANGUAGE SELECTOR ────────────────────────────── */
+    .lang-sel { position:relative; }
+    .lang-btn {
+      display:flex; align-items:center; gap:6px;
+      padding:7px 12px; border-radius:var(--r1);
+      background:transparent; border:1px solid var(--br2);
+      color:var(--t2); font-size:13px; font-weight:600;
+      cursor:pointer; transition:all .2s; font-family:inherit;
+      white-space:nowrap;
+    }
+    .lang-btn:hover { border-color:var(--t3); background:rgba(255,255,255,.04); color:var(--t1); }
+    .lang-flag { font-size:16px; line-height:1; }
+    .lang-chev { font-size:9px; opacity:.5; transition:transform .22s; }
+    .lang-sel.open .lang-chev { transform:rotate(180deg); }
+
+    .lang-drop {
+      position:absolute; top:calc(100% + 6px); right:0;
+      min-width:180px; background:rgba(10,10,10,.97);
+      backdrop-filter:blur(20px) saturate(1.4);
+      border:1px solid var(--br2); border-radius:var(--r2);
+      padding:6px; z-index:1020;
+      opacity:0; pointer-events:none;
+      transform:translateY(-6px) scale(.98);
+      transition:opacity .18s, transform .18s;
+    }
+    .lang-sel.open .lang-drop {
+      opacity:1; pointer-events:all; transform:translateY(0) scale(1);
+    }
+    .lang-opt {
+      display:flex; align-items:center; gap:10px;
+      padding:9px 11px; border-radius:var(--r1);
+      font-size:13px; font-weight:500; color:var(--t2);
+      cursor:pointer; transition:all .18s; border:none;
+      background:none; width:100%; text-align:left; font-family:inherit;
+    }
+    .lang-opt:hover { color:var(--t1); background:rgba(255,255,255,.06); }
+    .lang-opt.active { color:var(--green); }
+    .lang-opt-flag { font-size:18px; }
+    .lang-opt-name { flex:1; }
+    .lang-opt-check { font-size:12px; color:var(--green); }
+
+    /* Ocultar barra superior de Google Translate */
+    .goog-te-banner-frame, .skiptranslate { display:none !important; }
+    body { top:0 !important; }
+    .goog-te-gadget { display:none !important; }
+    #goog-gt-tt, .goog-tooltip { display:none !important; }
+
+    /* Mobile lang grid */
+    .mob-lang-grid {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:6px;
+      margin-bottom:10px;
+    }
+    .mob-lang-btn {
+      display:flex; flex-direction:column; align-items:center; gap:3px;
+      padding:8px 4px; border-radius:var(--r1);
+      background:rgba(255,255,255,.04); border:1px solid var(--br);
+      color:var(--t2); font-size:11px; font-weight:600;
+      cursor:pointer; transition:all .2s; font-family:inherit;
+    }
+    .mob-lang-btn:hover { background:rgba(255,255,255,.08); color:var(--t1); border-color:var(--br2); }
+    .mob-lang-btn.active { border-color:rgba(0,212,106,.4); color:var(--green); background:var(--green-glow); }
+    .mob-lang-btn .lf { font-size:20px; }
   </style>
 </head>
 <body>
@@ -2441,6 +2504,36 @@
 
     <div class="nav-cta" id="navCta">
       <button id="themeToggle" onclick="toggleTheme()" title="Cambiar tema" aria-label="Cambiar modo claro/oscuro">🌙</button>
+
+      <!-- Language selector desktop -->
+      <div class="lang-sel" id="langSel">
+        <button class="lang-btn" onclick="toggleLangDrop(event)" aria-label="Cambiar idioma">
+          <span class="lang-flag" id="langFlag">🇪🇸</span>
+          <span style="font-size:12px;letter-spacing:.5px" id="langCode">ES</span>
+          <span class="lang-chev">▾</span>
+        </button>
+        <div class="lang-drop" id="langDrop">
+          <button class="lang-opt active" data-lang="es" onclick="changeLang('es')">
+            <span class="lang-opt-flag">🇪🇸</span><span class="lang-opt-name">Español</span><span class="lang-opt-check" id="chk-es">✓</span>
+          </button>
+          <button class="lang-opt" data-lang="en" onclick="changeLang('en')">
+            <span class="lang-opt-flag">🇬🇧</span><span class="lang-opt-name">English</span><span class="lang-opt-check" id="chk-en" style="display:none">✓</span>
+          </button>
+          <button class="lang-opt" data-lang="fr" onclick="changeLang('fr')">
+            <span class="lang-opt-flag">🇫🇷</span><span class="lang-opt-name">Français</span><span class="lang-opt-check" id="chk-fr" style="display:none">✓</span>
+          </button>
+          <button class="lang-opt" data-lang="de" onclick="changeLang('de')">
+            <span class="lang-opt-flag">🇩🇪</span><span class="lang-opt-name">Deutsch</span><span class="lang-opt-check" id="chk-de" style="display:none">✓</span>
+          </button>
+          <button class="lang-opt" data-lang="pt" onclick="changeLang('pt')">
+            <span class="lang-opt-flag">🇵🇹</span><span class="lang-opt-name">Português</span><span class="lang-opt-check" id="chk-pt" style="display:none">✓</span>
+          </button>
+          <button class="lang-opt" data-lang="it" onclick="changeLang('it')">
+            <span class="lang-opt-flag">🇮🇹</span><span class="lang-opt-name">Italiano</span><span class="lang-opt-check" id="chk-it" style="display:none">✓</span>
+          </button>
+        </div>
+      </div>
+
       <a href="#perfil" class="btn btn-p btn-sm" onclick="SPA.go('perfil');return false;">Descubrir mi perfil →</a>
     </div>
 
@@ -2506,6 +2599,18 @@
 
   <!-- Footer botones -->
   <div class="mob-sb-foot">
+    <!-- Language selector mobile -->
+    <div>
+      <div style="font-size:11px;font-weight:600;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Idioma / Language</div>
+      <div class="mob-lang-grid">
+        <button class="mob-lang-btn" id="mlb-es" onclick="changeLang('es')"><span class="lf">🇪🇸</span>ES</button>
+        <button class="mob-lang-btn" id="mlb-en" onclick="changeLang('en')"><span class="lf">🇬🇧</span>EN</button>
+        <button class="mob-lang-btn" id="mlb-fr" onclick="changeLang('fr')"><span class="lf">🇫🇷</span>FR</button>
+        <button class="mob-lang-btn" id="mlb-de" onclick="changeLang('de')"><span class="lf">🇩🇪</span>DE</button>
+        <button class="mob-lang-btn" id="mlb-pt" onclick="changeLang('pt')"><span class="lf">🇵🇹</span>PT</button>
+        <button class="mob-lang-btn" id="mlb-it" onclick="changeLang('it')"><span class="lf">🇮🇹</span>IT</button>
+      </div>
+    </div>
     <button onclick="toggleTheme()" style="width:100%;padding:10px;background:rgba(255,255,255,.04);border:1px solid var(--br2);border-radius:var(--r1);color:var(--t2);font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:7px;display:flex;align-items:center;justify-content:center;gap:8px" id="mobThemeBtn">🌙 &nbsp;Cambiar tema</button>
     <a class="btn btn-p" href="#perfil" onclick="closeSidebar();SPA.go('perfil');return false;" style="justify-content:center">Descubrir mi perfil →</a>
   </div>
@@ -7966,5 +8071,100 @@ h1.hero-title .rgb-letter {
   }
 }());
 </script>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  SISTEMA DE TRADUCCIÓN — Google Translate       -->
+<!-- ═══════════════════════════════════════════════ -->
+<div id="google_translate_element" style="display:none;visibility:hidden;position:absolute"></div>
+
+<script>
+(function () {
+  var LANGS = {
+    es: { flag: '🇪🇸', code: 'ES' },
+    en: { flag: '🇬🇧', code: 'EN' },
+    fr: { flag: '🇫🇷', code: 'FR' },
+    de: { flag: '🇩🇪', code: 'DE' },
+    pt: { flag: '🇵🇹', code: 'PT' },
+    it: { flag: '🇮🇹', code: 'IT' }
+  };
+
+  var currentLang = localStorage.getItem('selectedLang') || 'es';
+
+  function updateUI(lc) {
+    var lang = LANGS[lc] || LANGS.es;
+    var flagEl = document.getElementById('langFlag');
+    var codeEl = document.getElementById('langCode');
+    if (flagEl) flagEl.textContent = lang.flag;
+    if (codeEl) codeEl.textContent = lang.code;
+
+    Object.keys(LANGS).forEach(function (k) {
+      var chk = document.getElementById('chk-' + k);
+      if (chk) chk.style.display = k === lc ? '' : 'none';
+      var opt = document.querySelector('.lang-opt[data-lang="' + k + '"]');
+      if (opt) opt.classList.toggle('active', k === lc);
+      var mb = document.getElementById('mlb-' + k);
+      if (mb) mb.classList.toggle('active', k === lc);
+    });
+  }
+
+  function applyTranslation(lc, attempt) {
+    attempt = attempt || 0;
+    if (attempt > 30) return;
+    var sel = document.querySelector('select.goog-te-combo');
+    if (!sel) { setTimeout(function () { applyTranslation(lc, attempt + 1); }, 300); return; }
+    if (sel.value === lc) return;
+    sel.value = lc;
+    sel.dispatchEvent(new Event('change'));
+  }
+
+  window.changeLang = function (lc) {
+    var drop = document.getElementById('langSel');
+    if (drop) drop.classList.remove('open');
+
+    if (lc === 'es') {
+      /* Volver al español original: limpiar cookie y recargar */
+      ['', '.' + location.hostname, location.hostname].forEach(function (d) {
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/' + (d ? '; domain=' + d : '') + ';';
+      });
+      localStorage.setItem('selectedLang', 'es');
+      location.reload();
+      return;
+    }
+
+    localStorage.setItem('selectedLang', lc);
+    currentLang = lc;
+    updateUI(lc);
+    applyTranslation(lc);
+  };
+
+  window.toggleLangDrop = function (e) {
+    e.stopPropagation();
+    var sel = document.getElementById('langSel');
+    if (sel) sel.classList.toggle('open');
+  };
+
+  document.addEventListener('click', function () {
+    var sel = document.getElementById('langSel');
+    if (sel) sel.classList.remove('open');
+  });
+
+  window.googleTranslateElementInit = function () {
+    new google.translate.TranslateElement({
+      pageLanguage: 'es',
+      includedLanguages: 'en,fr,de,pt,it',
+      autoDisplay: false,
+      layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+    }, 'google_translate_element');
+
+    if (currentLang && currentLang !== 'es') {
+      setTimeout(function () { applyTranslation(currentLang); }, 800);
+    }
+  };
+
+  /* Init UI inmediato con idioma guardado */
+  updateUI(currentLang);
+})();
+</script>
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" defer></script>
 </body>
 </html>
