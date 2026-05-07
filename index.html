@@ -2365,6 +2365,16 @@
       border-radius:var(--r1) !important; padding:5px 10px !important;
       font-size:13px !important; font-family:inherit !important;
     }
+    /* Ocultar logo de Google y separador */
+    .goog-te-gadget-simple img { display:none !important; }
+    .goog-te-gadget-simple span[style*="border-left"] { display:none !important; }
+    /* Añadir "Idioma" como etiqueta fija antes del desplegable */
+    .goog-te-gadget-simple::before {
+      content: '🌐 Idioma'; font-size:13px; font-weight:600;
+      color:var(--t2); margin-right:6px; pointer-events:none;
+    }
+    /* Ocultar el texto del idioma seleccionado para mostrar solo "Idioma" */
+    .goog-te-menu-value > span:not(:last-child) { display:none !important; }
     .goog-te-gadget-simple a { color:var(--t2) !important; text-decoration:none !important; }
     .goog-te-gadget-simple a:hover { color:var(--t1) !important; }
     .goog-te-menu-value span { color:var(--t2) !important; }
