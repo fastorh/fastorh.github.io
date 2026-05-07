@@ -8075,7 +8075,8 @@ h1.hero-title .rgb-letter {
 <!-- ═══════════════════════════════════════════════ -->
 <!--  SISTEMA DE TRADUCCIÓN — Google Translate       -->
 <!-- ═══════════════════════════════════════════════ -->
-<div id="google_translate_element" style="display:none;visibility:hidden;position:absolute"></div>
+<!-- Widget oculto fuera de pantalla (NO display:none — GT necesita renderizarlo) -->
+<div id="google_translate_element" style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;"></div>
 
 <script>
 (function () {
@@ -8096,7 +8097,6 @@ h1.hero-title .rgb-letter {
     var codeEl = document.getElementById('langCode');
     if (flagEl) flagEl.textContent = lang.flag;
     if (codeEl) codeEl.textContent = lang.code;
-
     Object.keys(LANGS).forEach(function (k) {
       var chk = document.getElementById('chk-' + k);
       if (chk) chk.style.display = k === lc ? '' : 'none';
@@ -8107,14 +8107,25 @@ h1.hero-title .rgb-letter {
     });
   }
 
+  function fireChange(el) {
+    var ev;
+    try { ev = new Event('change', { bubbles: true }); } catch(e) { ev = document.createEvent('HTMLEvents'); ev.initEvent('change', true, true); }
+    el.dispatchEvent(ev);
+  }
+
   function applyTranslation(lc, attempt) {
     attempt = attempt || 0;
-    if (attempt > 30) return;
+    if (attempt > 40) {
+      /* Fallback: cookie + reload si el select nunca apareció */
+      document.cookie = 'googtrans=/es/' + lc + ';path=/';
+      document.cookie = 'googtrans=/es/' + lc + ';domain=.' + location.hostname + ';path=/';
+      location.reload();
+      return;
+    }
     var sel = document.querySelector('select.goog-te-combo');
-    if (!sel) { setTimeout(function () { applyTranslation(lc, attempt + 1); }, 300); return; }
-    if (sel.value === lc) return;
+    if (!sel) { setTimeout(function () { applyTranslation(lc, attempt + 1); }, 250); return; }
     sel.value = lc;
-    sel.dispatchEvent(new Event('change'));
+    fireChange(sel);
   }
 
   window.changeLang = function (lc) {
@@ -8122,7 +8133,6 @@ h1.hero-title .rgb-letter {
     if (drop) drop.classList.remove('open');
 
     if (lc === 'es') {
-      /* Volver al español original: limpiar cookie y recargar */
       ['', '.' + location.hostname, location.hostname].forEach(function (d) {
         document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/' + (d ? '; domain=' + d : '') + ';';
       });
@@ -8157,14 +8167,14 @@ h1.hero-title .rgb-letter {
     }, 'google_translate_element');
 
     if (currentLang && currentLang !== 'es') {
-      setTimeout(function () { applyTranslation(currentLang); }, 800);
+      setTimeout(function () { applyTranslation(currentLang); }, 1000);
     }
   };
 
-  /* Init UI inmediato con idioma guardado */
   updateUI(currentLang);
 })();
 </script>
-<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" defer></script>
+<!-- Sin defer: el callback debe estar definido antes de que GT lo llame -->
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>
